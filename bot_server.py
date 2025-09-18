@@ -17,13 +17,16 @@ API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 # ============================
 def set_webhook():
     url = f"{API_URL}/setWebhook"
-    resp = requests.post(url, data={"url": WEBHOOK_URL})
+    # Используем полный URL с путем /webhook
+    webhook_url = f"{WEBHOOK_URL}/webhook"
+    resp = requests.post(url, data={"url": webhook_url})
     print("Webhook set:", resp.json())
+    return resp.json()
 
 # ============================
 # Обработка входящих сообщений
 # ============================
-@app.route("/", methods=["POST"])
+@app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
 
@@ -55,5 +58,6 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
