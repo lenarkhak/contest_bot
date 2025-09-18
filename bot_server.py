@@ -1,3 +1,54 @@
+import sqlite3
+import datetime
+import os
+
+# Функция инициализации базы данных
+def init_db():
+    # Подключаемся к базе данных (файл bot.db будет создан автоматически)
+    conn = sqlite3.connect('bot.db')
+    c = conn.cursor()
+    
+    # Создаем таблицу пользователей, если она не существует
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  chat_id INTEGER UNIQUE,
+                  username TEXT,
+                  first_name TEXT,
+                  last_name TEXT,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
+    # Создаем таблицу сообщений, если она не существует
+    c.execute('''CREATE TABLE IF NOT EXISTS messages
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  chat_id INTEGER,
+                  message_text TEXT,
+                  message_date TIMESTAMP,
+                  is_deleted BOOLEAN DEFAULT FALSE,
+                  FOREIGN KEY (chat_id) REFERENCES users (chat_id))''')
+    
+    # Создаем таблицу забаненных пользователей, если она не существует
+    c.execute('''CREATE TABLE IF NOT EXISTS banned_users
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  chat_id INTEGER UNIQUE,
+                  banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                  reason TEXT,
+                  FOREIGN KEY (chat_id) REFERENCES users (chat_id))''')
+    
+    # Создаем таблицу логов административных действий, если она не существует
+    c.execute('''CREATE TABLE IF NOT EXISTS admin_logs
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  admin_id INTEGER,
+                  action TEXT,
+                  target_id INTEGER,
+                  details TEXT,
+                  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
+    # Сохраняем изменения и закрываем соединение
+    conn.commit()
+    conn.close()
+
+# Вызываем инициализацию базы данных при запуске приложения
+init_db()       
 # bot_server.py
 # Telegram бот через Flask + Webhook для Railway
 
@@ -80,6 +131,7 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
