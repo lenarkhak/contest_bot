@@ -13,7 +13,7 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 
 # ============================
-# Установка webhook (один раз)
+# Установка webhook
 # ============================
 def set_webhook():
     try:
@@ -42,6 +42,16 @@ def set_webhook():
 # ============================
 # Обработка входящих сообщений
 # ============================
+@app.route("/")
+def index():
+    return "Bot is running!"
+
+@app.route("/set_webhook")
+def set_webhook_route():
+    """Ручная установка webhook через браузер"""
+    result = set_webhook()
+    return result
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
@@ -59,21 +69,27 @@ def webhook():
 
     return "ok"
 
-
 def send_message(chat_id, text):
-    url = f"{API_URL}/sendMessage"
-    requests.post(url, data={"chat_id": chat_id, "text": text})
-
+    try:
+        url = f"{API_URL}/sendMessage"
+        data = {
+            "chat_id": chat_id,
+            "text": text
+        }
+        requests.post(url, json=data, timeout=5)
+    except Exception as e:
+        print("Error sending message:", str(e))
 
 # ============================
-# Запуск
+# Запуск приложения
 # ============================
 if __name__ == "__main__":
-    # Устанавливаем webhook при запуске
+    # Устанавливаем webhook при запуске (только для development)
     set_webhook()
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
