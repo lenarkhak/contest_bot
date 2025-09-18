@@ -10,33 +10,32 @@ app = Flask(__name__)
 # Загружаем токен и URL из переменных окружения
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+ADMIN_ID = os.getenv("ADMIN_ID")  # Добавляем загрузку ADMIN_ID
 API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 
 # ============================
 # Установка webhook
 # ============================
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    update = request.get_json()
-    
-    # Добавьте логирование для отладки
-    print(f"Incoming update: {update}")
-    
-    if not update:
-        return "ok"
-
-    if "message" in update:
-        chat_id = update["message"]["chat"]["id"]
-        text = update["message"].get("text", "")
+def set_webhook():
+    try:
+        url = f"{API_URL}/setWebhook"
+        webhook_url = f"{WEBHOOK_URL}/webhook"
         
-        # Ответ пользователю
-        reply_text = f"Ты написал: {text}"
-        send_message(chat_id, reply_text)
+        data = {
+            "url": webhook_url,
+            "max_connections": 100,
+            "allowed_updates": ["message"]
+        }
         
-        # Логируем ID для отладки
-        print(f"Message from chat_id: {chat_id}")
+        resp = requests.post(url, json=data, timeout=10)
+        result = resp.json()
+        print("Webhook set:", result)
+        
+        return result
+    except Exception as e:
+        print("Error setting webhook:", str(e))
+        return {"ok": False, "error": str(e)}
 
-    return "ok"
 # ============================
 # Обработка входящих сообщений
 # ============================
@@ -44,23 +43,6 @@ def webhook():
 def index():
     return "Bot is running!"
 
-@app.route("/set_webhook")
-def set_webhook_route():
-    """Ручная установка webhook через браузер"""
-    result = set_webhook()
-    return result
-
-@app.route("/delete_webhook")
-def delete_webhook_route():
-    """Удаление webhook через браузер"""
-    try:
-        url = f"{API_URL}/deleteWebhook"
-        resp = requests.post(url, timeout=10)
-        result = resp.json()
-        return result
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
 @app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
@@ -72,7 +54,7 @@ def webhook():
         chat_id = update["message"]["chat"]["id"]
         text = update["message"].get("text", "")
 
-        # Ответ пользователю
+        # Ответ пользователю (исходная версия)
         reply_text = f"Ты написал: {text}"
         send_message(chat_id, reply_text)
 
