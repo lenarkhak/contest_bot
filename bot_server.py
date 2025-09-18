@@ -19,27 +19,22 @@ API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 def webhook():
     update = request.get_json()
     
-    # Детальное логирование для отладки
-    print("=== INCOMING REQUEST ===")
-    print(f"Update: {update}")
+    # Добавьте логирование для отладки
+    print(f"Incoming update: {update}")
     
     if not update:
-        print("Empty update received")
         return "ok"
 
     if "message" in update:
         chat_id = update["message"]["chat"]["id"]
-        user_id = update["message"]["from"]["id"]  # Это ваш Telegram ID
         text = update["message"].get("text", "")
         
-        # Логируем информацию о пользователе
-        print(f"User ID: {user_id}")
-        print(f"Chat ID: {chat_id}")
-        print(f"Message text: {text}")
-        
-        # Отвечаем пользователю с его ID
-        reply_text = f"Ваш Telegram ID: {user_id}\nChat ID: {chat_id}\nВы написали: {text}"
+        # Ответ пользователю
+        reply_text = f"Ты написал: {text}"
         send_message(chat_id, reply_text)
+        
+        # Логируем ID для отладки
+        print(f"Message from chat_id: {chat_id}")
 
     return "ok"
 # ============================
@@ -103,6 +98,7 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
