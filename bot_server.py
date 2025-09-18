@@ -15,32 +15,28 @@ API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 # ============================
 # Установка webhook
 # ============================
-def set_webhook():
-    try:
-        url = f"{API_URL}/setWebhook"
-        webhook_url = f"{WEBHOOK_URL}/webhook"
-        
-        print(f"Setting webhook to: {webhook_url}")
-        print(f"Using token: {TELEGRAM_BOT_TOKEN[:10]}...")  # Логируем начало токена для отладки
-        
-        data = {
-            "url": webhook_url,
-            "max_connections": 100,
-            "allowed_updates": ["message"]
-        }
-        
-        resp = requests.post(url, json=data, timeout=10)
-        result = resp.json()
-        print("Webhook set response:", result)
-        
-        if not result.get("ok"):
-            print("Error details:", result.get("description"))
-            
-        return result
-    except Exception as e:
-        print("Error setting webhook:", str(e))
-        return {"ok": False, "error": str(e)}
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    update = request.get_json()
+    
+    # Добавьте эту строку для логирования входящих данных
+    print(f"Incoming update: {update}")
+    
+    if not update:
+        return "ok"
 
+    if "message" in update:
+        chat_id = update["message"]["chat"]["id"]
+        text = update["message"].get("text", "")
+        
+        # Временно отвечаем с ID пользователя
+        reply_text = f"Ваш ID: {chat_id}\nВы написали: {text}"
+        send_message(chat_id, reply_text)
+        
+        # Логируем ID для отладки
+        print(f"Message from chat_id: {chat_id}")
+
+    return "ok"
 # ============================
 # Обработка входящих сообщений
 # ============================
@@ -102,6 +98,7 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
