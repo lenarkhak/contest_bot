@@ -23,7 +23,7 @@ def set_webhook():
 # ============================
 # Обработка входящих сообщений
 # ============================
-@app.route("/webhook", methods=["POST"])
+@app.route("/", methods=["POST"])
 def webhook():
     update = request.get_json()
 
@@ -55,4 +55,5 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
