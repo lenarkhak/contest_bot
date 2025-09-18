@@ -1,6 +1,3 @@
-notepad bot_server.py
-cd contest_bot
-nano bot_server.py
 # bot_server.py
 # Telegram бот через Flask + Webhook для Railway
 
@@ -58,3 +55,4 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
